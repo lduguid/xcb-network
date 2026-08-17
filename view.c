@@ -246,17 +246,22 @@ void view_draw(View *v, const Player *me, const Player *others, int n, const cha
 
     for (i = 0; i < n; i++) {
         char lab[20];
+        int x, y;
         if (!others[i].alive)
             continue;
-        fill(v, others[i].x, others[i].y, sz, sz, others[i].r, others[i].g, others[i].b);
+        x = (int)(others[i].px + 0.5f);
+        y = (int)(others[i].py + 0.5f);
+        fill(v, x, y, sz, sz, others[i].r, others[i].g, others[i].b);
         snprintf(lab, sizeof(lab), "%s", others[i].name);
-        text(v, others[i].x, others[i].y - 4, lab, 230, 230, 230);
+        text(v, x, y - 4, lab, 230, 230, 230);
     }
     if (me && me->alive) {
-        fill(v, me->x, me->y, sz, sz, me->r, me->g, me->b);
+        int x = (int)(me->px + 0.5f);
+        int y = (int)(me->py + 0.5f);
+        fill(v, x, y, sz, sz, me->r, me->g, me->b);
         XSetForeground(v->dpy, v->gc, rgb(v, 255, 255, 255));
-        XDrawRectangle(v->dpy, v->back, v->gc, me->x, me->y, (unsigned)sz, (unsigned)sz);
-        text(v, me->x, me->y - 4, me->name, 255, 255, 255);
+        XDrawRectangle(v->dpy, v->back, v->gc, x, y, (unsigned)sz, (unsigned)sz);
+        text(v, x, y - 4, me->name, 255, 255, 255);
     }
     XCopyArea(v->dpy, v->back, v->win, v->gc, 0, 0, (unsigned)v->w, (unsigned)v->h, 0, 0);
     XFlush(v->dpy);

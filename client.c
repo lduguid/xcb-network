@@ -75,8 +75,7 @@ int main(int argc, char **argv)
     view = view_open("xcb-network client (C/S)", 800, 560);
     if (!view)
         return 1;
-    me.x = 200;
-    me.y = (int16_t)(view_height(view) / 2);
+    player_place(&me, 200, view_height(view) / 2);
 
     prev = now_sec();
     send_t = 0;
@@ -115,6 +114,7 @@ int main(int argc, char **argv)
         player_move(&me, view_key_down(view, VKEY_LEFT), view_key_down(view, VKEY_RIGHT),
                     view_key_down(view, VKEY_UP), view_key_down(view, VKEY_DOWN), (float)dt,
                     view_width(view), view_height(view));
+        roster_smooth(others, nothers, (float)dt);
 
         send_t += dt;
         if (welcomed && send_t >= 0.05) {

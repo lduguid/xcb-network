@@ -1,15 +1,23 @@
 #include "sim.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
+
+void player_place(Player *p, int x, int y)
+{
+    p->x = (int16_t)x;
+    p->y = (int16_t)y;
+    p->px = (float)x;
+    p->py = (float)y;
+}
 
 void player_setup(Player *p, uint8_t id, const char *name, int x, int y)
 {
     memset(p, 0, sizeof(*p));
     p->id = id;
     p->alive = 1;
-    p->x = (int16_t)x;
-    p->y = (int16_t)y;
+    player_place(p, x, y);
     snprintf(p->name, PROTO_NAME, "%s", name ? name : "anon");
     proto_color_from_name(p->name, &p->r, &p->g, &p->b);
 }
@@ -17,7 +25,7 @@ void player_setup(Player *p, uint8_t id, const char *name, int x, int y)
 void player_move(Player *p, int left, int right, int up, int down, float dt, int w, int h)
 {
     float sp = 240.0f;
-    float x = p->x, y = p->y;
+    float x = p->px, y = p->py;
     if (left)
         x -= sp * dt;
     if (right)
@@ -42,6 +50,8 @@ void player_move(Player *p, int left, int right, int up, int down, float dt, int
         if (y > ymax)
             y = ymax;
     }
+    p->px = x;
+    p->py = y;
     p->x = (int16_t)x;
     p->y = (int16_t)y;
 }
@@ -107,5 +117,33 @@ void roster_apply_msg(Player *list, int *n, const Msg *m)
             player_setup(&tmp, m->id, "peer", m->x, m->y);
             roster_upsert(list, n, &tmp);
         }
+    }
+}
+
+void roster_smooth(Player *list, int n, float dt)
+{
+    int i;
+    if (dt < 0)
+        dt = 0;
+    if (dt > 0.05f)
+        dt = 0.05f;
+    for (i = 0; i < n; i++) {
+        Player *p = &list[i];
+        float dx, dy, a;
+        if (!p->alive)
+            continue;
+        dx = (float)p->x - p->px;
+        dy = (float)p->y - p->py;
+        /* Snap on join / huge correction so we do not ease across the window. */
+        if (dx * dx + dy * dy > 80.0f * 80.0f) {
+            p->px = (float)p->x;
+            p->py = (float)p->y;
+            continue;
+        }
+        a = 1.0f - expf(-16.0f * dt);
+        if (a > 1.0f)
+            a = 1.0f;
+        p->px += dx * a;
+        p->py += dy * a;
     }
 }

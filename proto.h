@@ -18,7 +18,8 @@ typedef struct {
     uint8_t id;
     char name[PROTO_NAME];
     uint8_t r, g, b;
-    int16_t x, y;
+    int16_t x, y; /* last local sim / last network pose */
+    float px, py; /* drawn pose; remote cubes ease toward x, y */
     int alive;
 } Player;
 

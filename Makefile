@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -O2 -D_POSIX_C_SOURCE=200809L $(shell pkg-config --cflags x11)
-LIBS = $(shell pkg-config --libs x11)
+LIBS = $(shell pkg-config --libs x11) -lm
 
 COMMON = proto.c net.c sim.c view.c proto.h net.h sim.h view.h
 
